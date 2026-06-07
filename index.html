@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4 Months of Us ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e27;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        /* Starfield Canvas */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Intro Overlay */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e27;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 2s ease, visibility 2s ease;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: #ffd700;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInUp 2s ease forwards;
+        }
+
+        .intro-sub {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255, 215, 0, 0.6);
+            opacity: 0;
+            animation: fadeInUp 2s ease 1s forwards;
+        }
+
+        .enter-btn {
+            margin-top: 50px;
+            padding: 15px 50px;
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            color: #ffd700;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeInUp 2s ease 2s forwards;
+            transition: all 0.5s ease;
+        }
+
+        .enter-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .main-content.visible {
+            opacity: 1;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .main-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 300;
+            color: #ffd700;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .main-title span {
+            display: block;
+            font-size: 0.5em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .month-counter {
+            margin-top: 30px;
+            font-size: 1rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: rgba(255, 215, 0, 0.7);
+        }
+
+        /* Timeline / Constellation Path */
+        .timeline-container {
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 215, 0, 0.2);
+            transform: translateX(-50%);
+        }
+
+        .memory-node {
+            position: relative;
+            margin: 60px 0;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .memory-node.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .memory-node:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .memory-node:nth-child(even) .memory-content {
+            text-align: right;
+            padding-right: 60px;
+            padding-left: 0;
+        }
+
+        .memory-content {
+            width: 50%;
+            padding-left: 60px;
+            text-align: left;
+        }
+
+        .memory-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #0a0e27;
+            border: 2px solid #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .memory-dot:hover {
+            transform: translateX(-50%) scale(1.5);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .memory-dot.active {
+            background: #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+        }
+
+        .memory-date {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .memory-title {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .memory-desc {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 200;
+        }
+
+        /* Hidden Message Reveal */
+        .secret-section {
+            margin-top: 100px;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .secret-prompt {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            color: rgba(255, 215, 0, 0.5);
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .heart-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            cursor: pointer;
+        }
+
+        .heart {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform: rotate(-45deg);
+            transition: transform 0.3s ease;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 52px;
+            height: 80px;
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 50px 50px 0 0;
+            transition: all 0.5s ease;
+        }
+
+        .heart::before {
+            left: 48px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .heart::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        .heart-container:hover .heart {
+            transform: rotate(-45deg) scale(1.1);
+        }
+
+        .heart-container:hover .heart::before,
+        .heart-container:hover .heart::after {
+            background: rgba(255, 215, 0, 0.6);
+        }
+
+        .heart-container.pulse .heart::before,
+        .heart-container.pulse .heart::after {
+            background: #ff6b9d;
+            box-shadow: 0 0 50px rgba(255, 107, 157, 0.6);
+        }
+
+        .hidden-message {
+            max-width: 600px;
+            margin: 40px auto 0;
+            padding: 40px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 20px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+            pointer-events: none;
+        }
+
+        .hidden-message.revealed {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .hidden-message p {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+        }
+
+        .hidden-message .signature {
+            margin-top: 20px;
+            font-style: italic;
+            color: #ffd700;
+        }
+
+        /* Shooting Star Animation */
+        .shooting-star {
+            position: fixed;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #fff, transparent);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes shoot {
+            0% {
+                opacity: 0;
+                transform: translateX(0) translateY(0) rotate(-45deg);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(500px) translateY(500px) rotate(-45deg);
+            }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 20px;
+            }
+            
+            .memory-node,
+            .memory-node:nth-child(even) {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-left: 50px;
+            }
+            
+            .memory-content,
+            .memory-node:nth-child(even) .memory-content {
+                width: 100%;
+                padding: 20px 0 0 0;
+                text-align: left;
+            }
+            
+            .memory-dot {
+                left: 20px;
+            }
+        }
+
+        /* Scroll indicator */
+        .scroll-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+            pointer-events: none;
+        }
+
+        .scroll-hint svg {
+            width: 30px;
+            height: 30px;
+            stroke: #ffd700;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .scroll-hint.hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Intro Overlay -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-text">Some stars shine brighter<br>when they're together</div>
+        <div class="intro-sub">4 months of us</div>
+        <button class="enter-btn" onclick="enterSite()">Enter Our Universe</button>
+    </div>
+
+    <!-- Starfield Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="title-section">
+            <h1 class="main-title">
+                Our Constellation
+                <span>Every star holds a memory</span>
+            </h1>
+            <div class="month-counter">Month 4 • And Counting</div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-line"></div>
+            
+            <!-- Month 1 -->
+            <div class="memory-node" data-month="1">
+                <div class="memory-dot" onclick="activateNode(this)"></div>
+                <div class="memory-content">
+                    <div class="memory-date">Month One</div>
+                    <div class="memory-title">The Beginning</div>
+                    <div class="memory-desc">
+                       Honestly, right after my birthday, everything just went crazy in the best way possible. Out of nowhere you suddenly confessed to me, and obviously I said yes right away without even thinking twice about it. Since we’ve literally been friends for a pretty long time since last year and the past years, our first month was just this massive wave of us looking back at the past. We couldn't stop laughing while going through our old Discord chats, Instagram DMs, and all those interactions that we had on TikTok from before. I vividly remember us constantly saying like, "Man, we really should've confessed way earlier," because it turns out we liked each other so much the whole time. February was honestly just one big celebration after another because of our birthdays, and then Valentines day hit right after. Even though we had some misunderstandings at first because long-distance communication can get pretty rough, we still managed to get past through it all. Because from day one, we both just knew this was worth fighting for.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Month 2 -->
+            <div class="memory-node" data-month="2">
+                <div class="memory-dot" onclick="activateNode(this)"></div>
+                <div class="memory-content">
+                    <div class="memory-date">Month Two</div>
+                    <div class="memory-title">Learning You</div>
+                    <div class="memory-desc">
+                        By the time March came by, we were LITERALLY the most lovey-dovey couple on the whole ass fucking universe baby but.. yeah, it wasn't always perfect kasi we still had our fair share of misunderstandings, random arguments, and little fights. The best part though is that we always talked things through, so no matter what happened, we still managed to get through it together at tska was also around the time I finally graduated, and I was just so genuinely happy that you were there to congratulate me cara andddd you even gave me a sort of present.. hehehe at least that's how I see it, and it honestly meant the absolute world to me. This was also when we started our Minecraft server together. We had so much fun making all those builds, designing our bases, the houses, and that cozy barn. Even though we didn't get to finish building that one farm yet (which we are totally going to play again and finish some time haaaaa), it felt like we built our own little world. Around that time, you also deleted your Discord account, and a lot of super important, deep promises were made because of it. That's when our "forever and always" became real.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Month 3 -->
+            <div class="memory-node" data-month="3">
+                <div class="memory-dot" onclick="activateNode(this)"></div>
+                <div class="memory-content">
+                    <div class="memory-date">Month Three</div>
+                    <div class="memory-title">Growing Roots</div>
+                    <div class="memory-desc">
+                        At the start of month three, things finally started to shift into a place where we truly understand each other. Lahat ng mga past arguments and fights natin actually taught us how to communicate way better, and dahil we js love each other so damn fucking much, we just keep coming out stronger and learning how to love each other even better. But even though we're getting more mature, we never lost our chaotic side. This was the month where we started playing Chaos Remastered literally every single day and we'd even hop on overkill sometimes, and man, it’s just the best feeling ever playing with you. Kahit ako na ung naglalaro minsan tas nanonood ka nalang sa stream ko HAHAHAHHAHA, just knowing that you're by my side while i'm playing feels like i really AM with you baby. Whether we're teaming up, messing around, or dealing with all the late-night chaotic panicking, nothing beats laughing until my stomach hurts with you. It made me realize that distance doesn't mean a single thing when someone holds your whole heart like this. You aren't just the person I escape reality with, you became my absolute safest reality, and the best part of every single day whenever I wake up.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Month 4 -->
+            <div class="memory-node" data-month="4">
+                <div class="memory-dot" onclick="activateNode(this)"></div>
+                <div class="memory-content">
+                    <div class="memory-date">Month Four</div>
+                    <div class="memory-title">Right Now and Forevermore</div>
+                    <div class="memory-desc">
+                        June 8 na ngayon baby, and honestly, di ko talaga mabilang kung gaano kabilis yung oras and 4th month na pala tayooo and pag tinitingnan ko lahat ng nangyari sa buong journey natin at lahat ng pinagdaanan natin dun sa mga nakaraang buwan kahit magkalayo tayo, sobrang proud lang talaga ko sa ating dalawa. Like, we actually survived the growing pains, nag-celebrate tayo ng mga big milestones, and we literally built our own little worlds habang todo ingat sa kung anong meron tayo. Standing here right now, I can easily say na mas mahal na mahal kita ngayon kumpara nung unang araw na naging tayo, no joke cara. Happy 4th Monthsary to my favorite person, sa aking ultimate comfort zone, at sa napakaganda kong girlfriend. I've loved you for four months now, and di na ko makapakahintay sa infinite amount of months ahead of us. Seryoso, simula pa lang 'to ng story nating dalawa.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       <!-- Secret Message Section -->
+        <div class="secret-section">
+            <div class="secret-prompt">Click the heart to reveal what's written in the stars...</div>
+            <div class="heart-container" id="heartContainer" onclick="revealMessage()">
+                <div class="heart"></div>
+            </div>
+            <div class="hidden-message" id="hiddenMessage">
+                <p>
+                    4 months ago and i have no idea na yung paborito kong place 
+                    sa buong mundo ay magiging kung nasaan ka man even tho na may laking distance that seperates between us,
+                    ewan ko kung paano pero nagagawa mong super special yung mga ordinary days ko. Like, yung mga quiet moments natin, 
+                    and our 24/7 calls from, literal na nagiging pinakamasayang part agad ng buong araw ko.
+                </p>
+                <p style="margin-top: 15px;">
+                    Honestly, hindi ko naman alam kung ano talagang mangyayari sa atin sa future, pero isa lang ang 
+                    100% kong nasisiguro ngayon, na gusto kong patuloy na alamin at harapin lahat ng yun nang magkasama tayo side by side. 
+                    Now that school is starting again, super magiging busy tayo for sure, pero I really hope na walang magbabago sa atin. 
+                    Kahit anong mangyari, I just want to keep discovering everything life brings with you. Magkasama sa bawat star, sa bawat tawa natin, 
+                    sa bawat laro, and sa bawat heartbeat natin, paisa-isa.
+                </p>
+                <p class="signature">Happy 4 Monthsary, Cara. Forever and always, here's to infinite more. ✨🌻</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-hint" id="scrollHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+    </div>
+
+    <script>
+        // Canvas Starfield
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Star {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.brightness = Math.random();
+                this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.brightness += this.twinkleSpeed;
+                
+                if (this.brightness > 1 || this.brightness < 0.3) {
+                    this.twinkleSpeed = -this.twinkleSpeed;
+                }
+
+                // Mouse interaction - stars gently move away from cursor
+                const dx = this.x - mouseX;
+                const dy = this.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    const force = (150 - dist) / 150;
+                    this.x += (dx / dist) * force * 0.5;
+                    this.y += (dy / dist) * force * 0.5;
+                }
+
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.brightness * 0.8})`;
+                ctx.fill();
+                
+                // Glow for brighter stars
+                if (this.size > 1.5) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${this.brightness * 0.1})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Create stars
+        for (let i = 0; i < 200; i++) {
+            stars.push(new Star());
+        }
+
+        // Draw constellation lines between nearby stars
+        function drawConstellations() {
+            for (let i = 0; i < stars.length; i++) {
+                for (let j = i + 1; j < stars.length; j++) {
+                    const dx = stars[i].x - stars[j].x;
+                    const dy = stars[i].y - stars[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(stars[i].x, stars[i].y);
+                        ctx.lineTo(stars[j].x, stars[j].y);
+                        ctx.strokeStyle = `rgba(255, 215, 0, ${(1 - dist / 100) * 0.15})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Deep space gradient
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width
+            );
+            gradient.addColorStop(0, '#0f1535');
+            gradient.addColorStop(1, '#050814');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawConstellations();
+            
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Mouse tracking
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Enter site
+        function enterSite() {
+            document.getElementById('introOverlay').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('mainContent').classList.add('visible');
+                revealTimeline();
+            }, 1000);
+        }
+
+        // Scroll reveal for timeline
+        function revealTimeline() {
+            const nodes = document.querySelectorAll('.memory-node');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            nodes.forEach(node => observer.observe(node));
+        }
+
+        // Activate memory node
+        function activateNode(dot) {
+            document.querySelectorAll('.memory-dot').forEach(d => d.classList.remove('active'));
+            dot.classList.add('active');
+            
+            // Create burst of particles
+            const rect = dot.getBoundingClientRect();
+            for (let i = 0; i < 8; i++) {
+                createParticle(rect.left + 10, rect.top + 10);
+            }
+        }
+
+        // Create floating particles
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 5000);
+        }
+
+        // Reveal hidden message
+        function revealMessage() {
+            const heart = document.getElementById('heartContainer');
+            const message = document.getElementById('hiddenMessage');
+            
+            heart.classList.add('pulse');
+            message.classList.add('revealed');
+            
+            // Firework effect
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createParticle(
+                        window.innerWidth / 2 + (Math.random() - 0.5) * 200,
+                        window.innerHeight / 2 + (Math.random() - 0.5) * 200
+                    );
+                }, i * 100);
+            }
+        }
+
+        // Shooting stars
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.top = Math.random() * window.innerHeight / 2 + 'px';
+            star.style.left = Math.random() * window.innerWidth / 2 + 'px';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 3000);
+        }
+
+        setInterval(createShootingStar, 4000);
+
+        // Hide scroll hint on scroll
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                document.getElementById('scrollHint').classList.add('hidden');
+            }
+        });
+
+        // Parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.title-section');
+            parallax.style.transform = `translateY(${scrolled * 0.3}px)`;
+        });
+    </script>
+</body>
+</html>
